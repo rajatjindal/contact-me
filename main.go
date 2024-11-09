@@ -16,8 +16,9 @@ import (
 
 func init() {
 	spinhttp.Handle(func(w http.ResponseWriter, r *http.Request) {
+		cors(w)
+
 		if r.Method == http.MethodOptions {
-			cors(w)
 			return
 		}
 
@@ -44,13 +45,9 @@ func init() {
 }
 
 func cors(w http.ResponseWriter) {
-	// Set CORS headers
-	header := w.Header()
-	header.Set("Access-Control-Allow-Methods", "*")
-	header.Set("Access-Control-Allow-Origin", "*")
-
-	// Adjust status code to 204
-	w.WriteHeader(http.StatusNoContent)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "authorization, content-type")
 }
 
 type Contact struct {

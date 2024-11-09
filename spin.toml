@@ -1,17 +1,41 @@
-spin_version = "1"
+spin_manifest_version = 2
+
+[application]
 authors = ["Rajat Jindal <rajatjindal83@gmail.com>"]
 description = ""
 name = "contact-me"
-trigger = { type = "http", base = "/" }
 version = "0.1.0"
 
-[[component]]
+[application.trigger.http]
+base = "/"
+
+
+[[trigger.http]]
 id = "backend"
+component = "backend"
+route = "/..."
+
+[component.backend]
 source = "main.wasm"
 allowed_http_hosts = []
 sqlite_databases = ["default"]
-[component.trigger]
-route = "/..."
-[component.build]
+
+[component.backend.build]
 command = "tinygo build -target=wasi -gc=leaking -no-debug -o main.wasm main.go"
 watch = ["**/*.go", "go.mod"]
+
+[variables]
+sqlite_username = { required = true }
+sqlite_password = { required = true }
+
+[[trigger.http]]
+component = "sqlite"
+route = "/internal/sqlite/..."
+
+[component.sqlite]
+source = { url = "https://github.com/karthik2804/spin-sqlite-web-cli/releases/download/v0.1.0/spin-sqlite-web-cli.wasm", digest = "sha256:2bab8dca3c50bc082c543ce9e9b367aec03e9de1efd62c6b748035bd9de48356" }
+sqlite_databases = ["default"]
+
+[component.sqlite.variables]
+sqlite_username = "{{ sqlite_username }}"
+sqlite_password = "{{ sqlite_password }}"
