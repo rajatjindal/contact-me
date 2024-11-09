@@ -1,0 +1,37 @@
+name: Deploy to Fermyon Cloud
+on:    
+  workflow_dispatch:
+    inputs: {}
+  push: 
+    branches:
+    - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code repo
+      uses: actions/checkout@v4
+    
+    - name: setup spin
+      uses: fermyon/actions/spin/setup@v1
+
+    - name: setup cloud plugin
+      run: spin plugin install -u https://github.com/vdice/cloud-plugin/releases/download/canary/cloud.json --yes
+
+    - name: "Install Go"
+      uses: actions/setup-go@v3
+      with:
+        go-version: "1.23.2"
+
+    - name: "Install TinyGo"
+      uses: rajatjindal/setup-actions/tinygo@v0.0.1
+      with:
+        version: 'v0.33.0'
+
+    - name: Deploy
+      uses: fermyon/actions/spin/deploy@v1
+      with:
+        fermyon_token: ${{ secrets.FERMYON_CLOUD_TOKEN }}
+
