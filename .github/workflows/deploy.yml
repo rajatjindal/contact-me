@@ -35,6 +35,6 @@ jobs:
       with:
         fermyon_token: ${{ secrets.FERMYON_CLOUD_TOKEN }}
         variables: |-
-            sqlite_username=${{ secrets.SQLITE_USERNAME }}
-            sqlite_password=${{ secrets.SQLITE_PASSWORD }}
+            slack_webhook=${{ secrets.slack_webhook }}
+
 

@@ -6,12 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
+	"strings"
 
 	spinhttp "github.com/fermyon/spin-go-sdk/http"
-	"github.com/fermyon/spin-go-sdk/sqlite"
-	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 func init() {
@@ -35,9 +32,9 @@ func init() {
 			return
 		}
 
-		err = createContact(r.Context(), contact)
+		err = sendMsg(r.Context(), contact)
 		if err != nil {
-			fmt.Println("ERROR: failed to add contact to db", err)
+			fmt.Println("ERROR: failed to send contact request", err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -51,31 +48,55 @@ func cors(w http.ResponseWriter) {
 }
 
 type Contact struct {
-	Id        string `json:"id" db:"id"`
-	Name      string `json:"name" db:"name"`
-	Email     string `json:"email" db:"email"`
-	Msg       string `json:"msg" db:"msg"`
-	CreatedAt string `json:"createdAt" db:"created_at"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Msg   string `json:"msg"`
 }
 
-func createContact(ctx context.Context, contact Contact) error {
-	conn := db()
-	defer conn.Close()
+func sendMsg(ctx context.Context, contact Contact) error {
+	payload := fmt.Sprintf(`{
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "New contact request from rajatjindal.com:"
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*Name*: %s"
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*Msg*: %s"
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*Email*: %s"
+			}
+		},
+	]
+}`, contact.Name, contact.Msg, contact.Email)
 
-	contact.CreatedAt = time.Now().Format(time.RFC3339)
-	contact.Id = uuid.NewString()
-
-	_, err := conn.QueryxContext(ctx, "INSERT INTO contact values (?, ?, ?, ?, ?)", contact.Id, contact.Name, contact.Email, contact.Msg, contact.CreatedAt)
+	resp, err := spinhttp.Post("", "application/json", strings.NewReader(payload))
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to send contact request")
+	}
 
 	return nil
-}
-
-func db() *sqlx.DB {
-	conn := sqlite.Open("default")
-	return sqlx.NewDb(conn, "sqlite")
 }
 
 func main() {}

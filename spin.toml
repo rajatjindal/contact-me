@@ -9,7 +9,6 @@ version = "0.1.0"
 [application.trigger.http]
 base = "/"
 
-
 [[trigger.http]]
 id = "backend"
 component = "backend"
@@ -24,18 +23,8 @@ sqlite_databases = ["default"]
 command = "tinygo build -target=wasi -gc=leaking -no-debug -o main.wasm main.go"
 watch = ["**/*.go", "go.mod"]
 
+[component.backend.variables]
+slack_webhook = "{{ slack_webhook }}"
+
 [variables]
-sqlite_username = { required = true }
-sqlite_password = { required = true }
-
-[[trigger.http]]
-component = "sqlite"
-route = "/internal/sqlite/..."
-
-[component.sqlite]
-source = { url = "https://github.com/karthik2804/spin-sqlite-web-cli/releases/download/v0.1.0/spin-sqlite-web-cli.wasm", digest = "sha256:2bab8dca3c50bc082c543ce9e9b367aec03e9de1efd62c6b748035bd9de48356" }
-sqlite_databases = ["default"]
-
-[component.sqlite.variables]
-sqlite_username = "{{ sqlite_username }}"
-sqlite_password = "{{ sqlite_password }}"
+slack_webhook = { required = true }
