@@ -16,8 +16,7 @@ route = "/..."
 
 [component.backend]
 source = "main.wasm"
-allowed_http_hosts = []
-sqlite_databases = ["default"]
+allowed_outbound_hosts = ["https://hooks.slack.com"]
 
 [component.backend.build]
 command = "tinygo build -target=wasi -gc=leaking -no-debug -o main.wasm main.go"

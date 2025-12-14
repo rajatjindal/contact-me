@@ -35,6 +35,6 @@ jobs:
       with:
         fermyon_token: ${{ secrets.FERMYON_CLOUD_TOKEN }}
         variables: |-
-            slack_webhook=${{ secrets.slack_webhook }}
+            slack_webhook=${{ secrets.SLACK_WEBHOOK_URL }}
 
 
