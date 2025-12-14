@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	spinhttp "github.com/fermyon/spin-go-sdk/http"
+	"github.com/fermyon/spin-go-sdk/variables"
 )
 
 func init() {
@@ -87,13 +88,19 @@ func sendMsg(ctx context.Context, contact Contact) error {
 	]
 }`, contact.Name, contact.Msg, contact.Email)
 
-	resp, err := spinhttp.Post("", "application/json", strings.NewReader(payload))
+	slackurl, err := variables.Get("slack_webhook")
 	if err != nil {
 		return err
 	}
+
+	resp, err := spinhttp.Post(slackurl, "application/json", strings.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to send contact request")
+		return fmt.Errorf("failed to send contact request. Expected Status code: %d, actual: %d", http.StatusOK, resp.StatusCode)
 	}
 
 	return nil
